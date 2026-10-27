@@ -1,8 +1,6 @@
 # Installation instructions
 
-Open powershell
-
-
+Open powershell / bash
 
 ```bash
 
@@ -12,13 +10,12 @@ cd setup-vpn
 
 ```
 
-
-
 Than copy your config file and paste into config.json.
-
-
 
 Then run:
 ```bash
+pwd
+su -
+cd <pwd-result>
 ./setup-vpn
 ```
