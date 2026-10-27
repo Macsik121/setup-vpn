@@ -1,0 +1,209 @@
+
+# Sing-box SET UP
+
+## sing-box utility installation
+# 1. Скачиваем правильный архив (с соблюдением регистра и структуры релизов)
+wget https://github.com/SagerNet/sing-box/releases/download/v1.12.8/sing-box-1.12.8-linux-amd64.tar.gz
+
+# 2. Распаковываем архив
+tar -xf sing-box-1.12.8-linux-amd64.tar.gz
+
+# 3. Переносим бинарник в системную папку /usr/local/bin/
+sudo mv sing-box-1.12.8-linux-amd64/sing-box /usr/local/bin/
+
+# 4. Проверяем, что программа теперь доступна и версия корректна
+sing-box version
+
+*Create the folder somewhere and copy config.json there*
+
+## config.json
+
+*create config.json:* 
+
+## adding vless
+Вот универсальный шаблон для добавления любых подобных VLESS Reality ключей в секцию outbounds вашего config.json. Из него убраны все специфические значения, чтобы вы могли просто копировать этот блок для каждого нового сервера и вставлять данные из ссылки.
+
+📋 Универсальный JSON-шаблон для VLESS Reality
+
+json
+{
+  "type": "vless",
+  "tag": "УНИКАЛЬНЫЙ_ТЕГ_УЗЛА",
+  "server": "IP_АДРЕС_ИЛИ_ДОМЕН",
+  "server_port": 443,
+  "uuid": "ВАШ_UUID",
+  "flow": "xtls-rprx-vision",
+  "network": "tcp",
+  "domain_resolver": "dns-remote",
+  "tls": {
+    "enabled": true,
+    "server_name": "МАСКИРОВОЧНЫЙ_SNI_ДОМЕН",
+    "utls": {
+      "enabled": true,
+      "fingerprint": "edge"
+    },
+    "reality": {
+      "enabled": true,
+      "public_key": "ПУБЛИЧНЫЙ_КЛЮЧ_PBK",
+      "short_id": "SHORT_ID_СЕССИИ"
+    }
+  }
+}
+Используйте код с осторожностью.
+
+🗺️ Памятка: куда вставлять значения из ссылки vless://
+
+Чтобы быстро заполнить этот шаблон, ориентируйтесь на структуру вашей ссылки:
+
+vless://  UUID  @  SERVER  :  PORT  ?encryption=none&flow=  FLOW  &type=  NETWORK  &headerType=none&security=reality&fp=  FINGERPRINT  &pbk=  PUBLIC_KEY  &sid=  SHORT_ID  &sni=  SERVER_NAME  #  TAG
+
+• tag — название узла (пишется латиницей без пробелов, например "proxy", "japan-backup", "node-3"). Берется из текста после знака #.
+• server — IP-адрес или домен сервера. Находится в ссылке между знаком @ и двоеточием : (в вашем примере: 66.90.92.53).
+• server_port — цифры порта сразу после двоеточия (в вашем примере: 443). В JSON пишется без кавычек.
+• uuid — длинный уникальный идентификатор. Идет в самом начале ссылки сразу после vless:// и до знака @.
+• flow — технология шифрования внутри TLS. Ищется после параметра flow= (в вашем примере: xtls-rprx-vision).
+• network — тип сети (обычно tcp). Ищется после параметра type=.
+• server_name — домен маскировки. Ищется после параметра sni= (в вашем примере: 919c2e654b58.j.cloudfront.hls.ttvnw.net).
+• public_key — публичный Reality-ключ. Ищется после параметра pbk=.
+• short_id — короткий ID сессии Reality. Ищется после параметра sid=.
+
+💡 Как объединить несколько узлов в массиве outbounds
+
+Каждый новый узел — это отдельный объект внутри фигурных скобок {...}, и они должны разделяться запятыми. Последний элемент в списке запятой не закрывается.
+Вот как теперь будет выглядеть правильная структура outbounds в вашем файле конфигурации:
+json```
+  "outbounds": [
+    {
+      "type": "vless",
+      "tag": "proxy",
+      "server": "66.90.92.53",
+      "server_port": 443,
+      "uuid": "d415c24a-5fc3-00bd-9d42-4fbc60d18cb4",
+      "flow": "xtls-rprx-vision",
+      "network": "tcp",
+      "domain_resolver": "dns-remote",
+      "tls": {
+        "enabled": true,
+        "server_name": "919c2e654b58.j.cloudfront.hls.ttvnw.net",
+        "utls": { "enabled": true, "fingerprint": "edge" },
+        "reality": {
+          "enabled": true,
+          "public_key": "10rVZPoOUP1TlQviIAsQ_jAROX0fRQxH0C92nq_zGQc",
+          "short_id": "43dcff53849b81e6"
+        }
+      }
+    },
+    {
+      "type": "vless",
+      "tag": "japan-backup",
+      "server": "123.45.67.89",
+      "server_port": 443,
+      "uuid": "другой-uuid-сервера",
+      "flow": "xtls-rprx-vision",
+      "network": "tcp",
+      "domain_resolver": "dns-remote",
+      "tls": {
+        "enabled": true,
+        "server_name": "другой-sni-домен",
+        "utls": { "enabled": true, "fingerprint": "edge" },
+        "reality": {
+          "enabled": true,
+          "public_key": "другой-публичный-ключ",
+          "short_id": "другой-short-id"
+        }
+      }
+    },
+    {
+      "type": "direct",
+      "tag": "direct",
+      "domain_resolver": "dns-local"
+    }
+  ]
+`
+Если у вас возникнут сложности с переносом какого-то конкретного ключа или если формат параметров в других ссылках будет немного отличаться (например, вместо type=tcp будет type=ws), отправьте ссылку сюда. Помочь ли вам сгруппировать их в selector (чтобы переключать одной кнопкой) или вы пока пропишете их списком?
+
+*then launch:*
+sing-box check -c /path/to/your/config.json
+
+*if successful:*
+bash```
+sudo sing-box run -c /home/student/sing-box-setup/config.json
+`
+
+## Tests I used to try VPN
+
+### Commands
+
+*try these commands and bring the error logs of sing-box and error result of these comands to AI. Or explain the problem to AI on your own*
+
+bash```
+ping google.com -c 4
+ping 8.8.8.8 -c 4
+ping github.com -c 4
+
+wget ipinfo.io/what-is-my-ip
+cat what-is-my-ip
+`
+
+## if still not successful
+ask AI
+
+### install a fresh browser if the system is old
+
+Установка современных версий браузеров (включая Firefox) на CentOS 7 штатными средствами (через yum) давно невозможна, так как операционная система официально признана устаревшей, а версии библиотек в ней застыли на уровне 2014 года.
+Использование Flatpak — это единственный надежный способ запустить самый свежий и безопасный Firefox на CentOS 7, так как Flatpak изолирует приложение и несет все новые библиотеки с собой.
+Ниже приведена пошаговая инструкция по настройке.
+
+Шаг 1. Установка и настройка Flatpak в системе
+
+В репозиториях CentOS 7 уже есть пакет Flatpak, но перед его установкой рекомендуется обновить кэш пакетного менеджера.
+Выполните в терминале:
+bash
+# 1. Обновляем информацию о пакетах
+sudo yum update -y
+
+# 2. Устанавливаем сам Flatpak
+sudo yum install flatpak -y
+Используйте код с осторожностью.
+
+Шаг 2. Подключение официального репозитория Flathub
+
+Flathub — это главный мировой репозиторий, откуда скачиваются почти все Flatpak-приложения, включая Firefox. Добавим его в систему:
+bash
+sudo flatpak remote-add --if-not-exists flathub https://flathub.org
+Используйте код с осторожностью.
+
+Шаг 3. Перезагрузка системы (Обязательно)
+
+Для того чтобы среда рабочего стола (GNOME/KDE) корректно увидела новые пути Flatpak и ярлыки приложений, необходимо перезагрузить компьютер:
+bash
+sudo reboot
+Используйте код с осторожностью.
+
+Шаг 4. Установка Firefox
+
+После перезагрузки откройте терминал и запустите установку Firefox из репозитория Flathub. Система автоматически скачает сам браузер и необходимые для него изолированные библиотеки (Runtime):
+bash
+sudo flatpak install flathub net.waterfox.waterfox -y
+Используйте код с осторожностью.
+Процесс может занять несколько минут, так как в первый раз Flatpak будет скачивать весомые базовые графические платформы (Gnome/Freedesktop Runtime).
+
+Шаг 5. Запуск Firefox
+
+После успешного завершения установки запустить Firefox можно двумя способами:
+1. Через графический интерфейс: Иконка Firefox автоматически появится в вашем меню приложений (в категории «Интернет» или «Офис»).
+2. Через терминал: Если вам нужно запустить браузер вручную из консоли, выполните:bash
+flatpak run net.waterfox.waterfox
+Используйте код с осторожностью.
+
+💡 Полезные команды для работы с Flatpak:
+
+• Обновление Firefox (рекомендуется делать раз в неделю, чтобы браузер оставался безопасным):bash
+flatpak update net.waterfox.waterfox -y
+
+• Просмотр установленных приложений:bash
+flatpak list
+Используйте код с осторожностью.
+Удалось ли успешно установить и запустить Firefox на вашей CentOS 7? Если возникнут проблемы с отображением шрифтов или звуком внутри изолированного Flatpak, дайте знать — я подскажу, какие права доступа нужно выдать приложению.
+
+
