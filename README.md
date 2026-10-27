@@ -17,5 +17,6 @@ Then run:
 pwd
 su -
 cd <pwd-result>
+chmod +x setup-vpn.sh
 ./setup-vpn
 ```
