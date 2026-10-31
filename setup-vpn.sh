@@ -1,3 +1,5 @@
+# pfuhepbnDownload a sing-box archhhieve with a needed version
+# if you're on windows: https://github.com/SagerNet/sing-box/releases/download/v1.12.8/sing-box-1.12.8-windows-amd64.zip
 wget https://github.com/SagerNet/sing-box/releases/download/v1.12.8/sing-box-1.12.8-linux-amd64.tar.gz
 
 # 2. Распаковываем архив
