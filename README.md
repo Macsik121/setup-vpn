@@ -1,13 +1,18 @@
 # Installation instructions
 
-## If you're on windows
+## For Windows
 
 *Prerequisities:*
 
-1. Make sure you have chocolatey package manager installed through "choco --version". If not, open powershell as an administrator and run:
+1. make sure to move to the folder where your setup-vpn repo is cloned.
+
+### Docker installation
+
+2. Make sure you have chocolatey package manager installed through "choco --version". If not, open powershell as an administrator and run:
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-2. make sure to move to the folder where your setup-vpn repo is cloned.
+3. if no docker installed, run : choco install docker-desktop
+
 
 *Here's a manual setup:*
 
@@ -20,7 +25,40 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManage
 7. sing-box run -c ../config.json
 8. run the last line of test-connection.sh which is: firefox "youtube.com" ...
 
-Open bash
+## For Linux
+
+### Docker installation
+*Phase 1:*
+```bash
+# Add Docker's official GPG key:
+sudo apt update
+sudo apt install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+```
+
+*Phase 2:*
+```bash
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo systemctl status docker
+sudo systemctl start docker
+sudo docker run hello-world
+```
+
+### Open bash
 
 ```bash
 
@@ -31,10 +69,22 @@ cd setup-vpn
 ```
 
 Then run:
+#### terminal 1
 ```bash
+pwd
+
 chmod +x setup-vpn.sh
 
 ./setup-vpn
+```
+
+#### terminal 2
+```bash
+cd (terminal 1 pwd-result)
+
+chmod +x test-connection.sh
+
+./test-connection
 ```
 
 In an external terminal with the same path(see in pwd):
@@ -42,3 +92,4 @@ In an external terminal with the same path(see in pwd):
 chmod +x test-connection.sh
 
 ./test-connection
+```
